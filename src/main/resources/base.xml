@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Name="$appName" Id="$uuid" UpgradeCode="$appId"
+             Language="1033" Codepage="1252" Version="4.1.0" Manufacturer="$organization">
+
+        <Package Id="*" Keywords="Installer" Description="$appName Installer"
+                 Comments="$appName is a registered trademark of $organization" Manufacturer="$organization"
+                 InstallerVersion="200" Languages="1033" Compressed="yes" SummaryCodepage="1252" Platform="x64"/>
+
+        <Media Id="1" Cabinet="$appName.cab" EmbedCab="yes"/>
+
+        <MajorUpgrade Schedule="afterInstallInitialize"
+                      DowngradeErrorMessage="A later version of [ProductName] is already installed"
+                      AllowSameVersionUpgrades="yes"/>
+
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="ProgramFiles64Folder" Name="PFiles">
+            </Directory>
+            <Directory Id="ProgramMenuFolder" Name="Programs">
+                <Directory Id="ProgramMenuDir" Name="$appName">
+                    <Component Id="ProgramMenuDir" Guid="$uuid">
+                        <RemoveFolder Id="ProgramMenuDir" On="uninstall"/>
+                        <RegistryValue Root="HKCU" Key="Software\\[Manufacturer]\\[ProductName]" Type="string"
+                                       Value=""/>
+                    </Component>
+                </Directory>
+            </Directory>
+            <Directory Id="DesktopFolder" Name="Desktop"/>
+        </Directory>
+
+        <Feature Id="Complete" Level="1">
+            $components
+            <ComponentRef Id="ProgramMenuDir"/>
+        </Feature>
+
+        <Icon Id="$appName.ico" SourceFile="$appName.ico"/>
+        <Property Id="ARPPRODUCTICON" Value="$appName.ico"/>
+        <WixVariable Id="WixUIBannerBmp" Value="TopBannerMSI.bmp"/>
+        <WixVariable Id="WixUIDialogBmp" Value="DialogMSI.bmp"/>
+        <WixVariable Id="WixUILicenseRtf" Value="license.rtf"/>
+        <UI>
+            <UIRef Id="WixUI_Minimal"/>
+            <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplication">NOT Installed
+            </Publish>
+        </UI>
+
+        <Property Id="WixShellExecTarget" Value="[#$appName.exe]"/>
+        <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes"/>
+    </Product>
+</Wix>
