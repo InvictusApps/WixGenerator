@@ -1,0 +1,3 @@
+<Component Id="$componentId" Guid="$uuid" Win64="$win64">
+    <File Id="$fileId" Name="$fileName" DisId="1" Source="$fileRelativePath" KeyPath="yes">$fileContent</File>$componentContent
+</Component>

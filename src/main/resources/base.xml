@@ -15,6 +15,7 @@
 
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="ProgramFiles64Folder" Name="PFiles">
+$files
             </Directory>
             <Directory Id="ProgramMenuFolder" Name="Programs">
                 <Directory Id="ProgramMenuDir" Name="$appName">
@@ -29,7 +30,7 @@
         </Directory>
 
         <Feature Id="Complete" Level="1">
-            $components
+$components
             <ComponentRef Id="ProgramMenuDir"/>
         </Feature>
 

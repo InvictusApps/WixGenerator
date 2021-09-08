@@ -1,0 +1,3 @@
+    <RegistryKey Root="$root" Key="$key">
+        <RegistryValue Type="$type" Name="$name" Value="$value"/>
+    </RegistryKey>

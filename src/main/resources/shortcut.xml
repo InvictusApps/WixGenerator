@@ -1,0 +1,7 @@
+<Shortcut Id="$id"
+          Directory="$directory"
+          Name="$name"
+          WorkingDirectory="INSTALLDIR"
+          Icon="$icon"
+          IconIndex="0"
+          Advertise="yes"/>
