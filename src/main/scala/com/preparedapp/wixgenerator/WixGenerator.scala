@@ -34,7 +34,7 @@ case class WixGenerator(appName: String,
     update("files", directories)
     update("appName", appName)
     update("appId", appId.s)
-    update("uuid", uuid().s)
+    withUUID()
     update("organization", organization)
 
     val refs = componentRefs.reverse.map { refId =>
@@ -89,9 +89,9 @@ case class WixGenerator(appName: String,
     val relativePath = file.relativePath
     val wixFile = fileMap.getOrElse(relativePath, WixFile(relativePath))
     val componentId = nextId
-    val fileId = nextId
+    val fileId = if (wixFile.isDefault) nextId else file.getName
     xml = update("componentId", componentId, Some(xml))
-    xml = update("uuid", uuid().s, Some(xml))
+    xml = withUUID(Some(xml))
     xml = update("win64", if (wixFile.win64) "yes" else "no", Some(xml))
     xml = update("fileId", fileId, Some(xml))
     xml = update("fileName", file.getName, Some(xml))
@@ -140,14 +140,23 @@ case class WixGenerator(appName: String,
     xml
   }
 
-  private def update(key: String, value: => String, updating: Option[String] = None): String = try {
-    val updated = ("[\\$]" + key).r.replaceAllIn(updating.getOrElse(xml), _ => {
-      value
-    })
+  private def update(key: String, value: String, updating: Option[String] = None): String = try {
+    val lookup = "$" + key
+    val updated = updating.getOrElse(xml).replace(lookup, value)
     if (updating.isEmpty) xml = updated
     updated
   } catch {
     case t: Throwable => throw new RuntimeException(s"Error Replacing: $key in ${updating.getOrElse(xml)} -> $value", t)
+  }
+
+  private def withUUID(updating: Option[String] = None): String = try {
+    val updated = ("[\\$]" + "uuid").r.replaceAllIn(updating.getOrElse(xml), _ => {
+      uuid().s
+    })
+    if (updating.isEmpty) xml = updated
+    updated
+  } catch {
+    case t: Throwable => throw new RuntimeException(s"Error Replacing: uuid in ${updating.getOrElse(xml)}", t)
   }
 
   private def save(): Unit = {
@@ -190,6 +199,8 @@ case class WixFile(path: String,
                    startMenuShortcut: Option[Shortcut] = None,
                    desktopShortcut: Option[Shortcut] = None,
                    autoRun: Boolean = false,
-                   win64: Boolean = true)
+                   win64: Boolean = true) {
+  def isDefault: Boolean = startMenuShortcut.isEmpty && desktopShortcut.isEmpty && !autoRun && win64
+}
 
 case class Shortcut(name: String, icon: String)
