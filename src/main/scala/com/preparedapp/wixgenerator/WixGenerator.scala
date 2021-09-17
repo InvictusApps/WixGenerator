@@ -64,7 +64,7 @@ case class WixGenerator(appName: String,
     xml = update("directoryId", directoryId, Some(xml))
     xml = update("directoryName", directory.getName, Some(xml))
     xml = xml.replace("\n", s"\n$padding")
-    val content = directory.listFiles().map { file =>
+    val content = directory.listFiles().filter(exclusions).map { file =>
       if (file.isDirectory) {
         process(file, depth + 1)
       } else {
@@ -78,24 +78,29 @@ case class WixGenerator(appName: String,
     xml
   }
 
+  private def exclusions(file: File): Boolean = file.getName.toLowerCase match {
+    case s if s.endsWith(".wxs") || s.endsWith(".wixobj") => false
+    case _ => true
+  }
+
   private def component(file: File, depth: Int): String = {
     val padding = "".padTo(depth, '\t')
     var xml = s"$padding${XML.Component}"
     val relativePath = file.relativePath
     val wixFile = fileMap.getOrElse(relativePath, WixFile(relativePath))
-    val componentId = s"${relativePath}Component"
+    val componentId = nextId
     val fileId = nextId
     xml = update("componentId", componentId, Some(xml))
     xml = update("uuid", uuid().s, Some(xml))
     xml = update("win64", if (wixFile.win64) "yes" else "no", Some(xml))
     xml = update("fileId", fileId, Some(xml))
     xml = update("fileName", file.getName, Some(xml))
-    xml = update("fileRelativePath", relativePath, Some(xml))
+    xml = update("fileRelativePath", relativePath.replace("\\", "\\\\"), Some(xml))
     var fileContent = List.empty[String]
 
     def shortcut(shortcut: Shortcut, location: String): String = {
       var s = s"\t\t${XML.Shortcut}"
-      s = update("id", uuid().s, Some(s))
+      s = update("id", nextId, Some(s))
       s = update("directory", location, Some(s))
       s = update("name", shortcut.name, Some(s))
       s = update("icon", shortcut.icon, Some(s))

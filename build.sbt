@@ -2,7 +2,7 @@ name := "wix-generator"
 organization := "com.preparedapp"
 version := "1.0.0-SNAPSHOT"
 
-scalaVersion := "3.0.1"
+scalaVersion := "2.13.6"
 
 fork := true
 scalacOptions ++= Seq("-deprecation")
